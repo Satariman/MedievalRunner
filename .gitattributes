@@ -74,3 +74,9 @@
 *.hlsl text eol=lf
 *.asmdef text eol=lf
 *.inputactions text eol=lf
+
+# Игнорировать сторонние библиотеки в статистике языков
+"Assets/TextMesh Pro/**" linguist-vendored
+"Assets/TutorialInfo/**" linguist-vendored
+"Assets/Settings/**" linguist-vendored
+"Assets/Samples/**" linguist-vendored
