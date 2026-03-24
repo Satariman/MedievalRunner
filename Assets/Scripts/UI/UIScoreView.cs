@@ -1,3 +1,4 @@
+using System;
 using MedievalRunner.Score;
 using TMPro;
 using UnityEngine;
@@ -9,6 +10,15 @@ namespace MedievalRunner.UI
         [SerializeField] private ScoreManager scoreManager;
         [SerializeField] private TMP_Text scoreText;
         [SerializeField] private string prefix = "Score: ";
+
+        private readonly char[] _buffer = new char[32];
+        private int _prefixLength;
+
+        private void Awake()
+        {
+            _prefixLength = prefix.Length;
+            prefix.CopyTo(0, _buffer, 0, _prefixLength);
+        }
 
         private void OnEnable()
         {
@@ -33,7 +43,10 @@ namespace MedievalRunner.UI
                 return;
             }
 
-            scoreText.text = $"{prefix}{score}";
+            if (score.TryFormat(new Span<char>(_buffer, _prefixLength, _buffer.Length - _prefixLength), out int charsWritten))
+            {
+                scoreText.SetCharArray(_buffer, 0, _prefixLength + charsWritten);
+            }
         }
     }
 }

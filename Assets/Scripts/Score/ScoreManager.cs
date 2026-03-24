@@ -12,6 +12,8 @@ namespace MedievalRunner.Score
 
         public event Action<int> OnScoreChanged;
 
+        public int CurrentScore => currentScore;
+
         private float scoreMultiplier = 1f;
         private float scoreAccumulator;
         private int currentScore;
@@ -52,6 +54,14 @@ namespace MedievalRunner.Score
         public void SetScoringEnabled(bool enabled)
         {
             scoringEnabled = enabled;
+        }
+
+        public void ResetScore()
+        {
+            currentScore = 0;
+            scoreAccumulator = 0f;
+            scoreMultiplier = 1f;
+            OnScoreChanged?.Invoke(currentScore);
         }
 
         public void SetBoostActive(bool active)

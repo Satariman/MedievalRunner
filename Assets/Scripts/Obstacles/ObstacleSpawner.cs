@@ -14,11 +14,13 @@ namespace MedievalRunner.Obstacles
         [SerializeField] private List<ObstacleData> obstacleData = new List<ObstacleData>();
         [SerializeField] private WorldMover worldMover;
         [SerializeField] private PlayerHealth targetHealth;
+        [SerializeField] private int poolSizePerType = 5;
 
         public event Action<ObstacleBase> OnObstacleSpawned;
 
         private float timer;
         private bool spawningEnabled = true;
+        private readonly Dictionary<ObstacleData, Queue<ObstacleBase>> _pool = new Dictionary<ObstacleData, Queue<ObstacleBase>>();
 
         private void Update()
         {
@@ -40,9 +42,53 @@ namespace MedievalRunner.Obstacles
             spawningEnabled = enabled;
         }
 
+        private ObstacleBase GetFromPool(ObstacleData data)
+        {
+            if (_pool.TryGetValue(data, out Queue<ObstacleBase> queue) && queue.Count > 0)
+            {
+                ObstacleBase pooled = queue.Dequeue();
+                if (pooled != null)
+                {
+                    return pooled;
+                }
+            }
+
+            GameObject instance = Instantiate(data.Prefab);
+            ObstacleBase obstacle = instance.GetComponent<ObstacleBase>();
+            if (obstacle != null)
+            {
+                obstacle.OnDespawn += ReturnToPool;
+            }
+            return obstacle;
+        }
+
+        private void ReturnToPool(ObstacleBase obstacle)
+        {
+            if (obstacle == null || obstacle.Data == null)
+            {
+                return;
+            }
+
+            if (!_pool.TryGetValue(obstacle.Data, out Queue<ObstacleBase> queue))
+            {
+                queue = new Queue<ObstacleBase>();
+                _pool[obstacle.Data] = queue;
+            }
+
+            if (queue.Count < poolSizePerType)
+            {
+                queue.Enqueue(obstacle);
+            }
+            else
+            {
+                obstacle.OnDespawn -= ReturnToPool;
+                Destroy(obstacle.gameObject);
+            }
+        }
+
         private void SpawnRandomObstacle()
         {
-            ObstacleData data = obstacleData[UnityEngine.Random.Range(0, obstacleData.Count)];
+            ObstacleData data = obstacleData[Random.Range(0, obstacleData.Count)];
             if (data == null || data.Prefab == null)
             {
                 return;
@@ -51,10 +97,11 @@ namespace MedievalRunner.Obstacles
             Vector3 basePosition = spawnPoint != null ? spawnPoint.position : transform.position;
             Vector3 spawnPosition = basePosition + Vector3.up * data.SpawnHeight + Vector3.left * Random.Range(-3, 3);
 
-            GameObject instance = Instantiate(data.Prefab, spawnPosition, data.Prefab.transform.rotation);
-            ObstacleBase obstacle = instance.GetComponent<ObstacleBase>();
+            ObstacleBase obstacle = GetFromPool(data);
             if (obstacle != null)
             {
+                obstacle.transform.SetPositionAndRotation(spawnPosition, data.Prefab.transform.rotation);
+                obstacle.gameObject.SetActive(true);
                 obstacle.Initialize(data, worldMover, targetHealth);
                 OnObstacleSpawned?.Invoke(obstacle);
             }

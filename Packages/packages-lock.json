@@ -1,14 +1,5 @@
 {
   "dependencies": {
-    "com.cursor.unity-mcp": {
-      "version": "https://github.com/amengol/UnityMCP-Cursor.git?path=/unity-mcp-package",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.2.1"
-      },
-      "hash": "3982c9def076677f961d109f6b263b53683a1e37"
-    },
     "com.unity.burst": {
       "version": "1.8.28",
       "depth": 2,
@@ -110,13 +101,6 @@
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.6",
       "depth": 3,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.nuget.newtonsoft-json": {
-      "version": "3.2.2",
-      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"

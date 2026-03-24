@@ -10,10 +10,12 @@ namespace MedievalRunner.Input
         [SerializeField] private InputActionReference moveAction;
         [SerializeField] private InputActionReference jumpAction;
         [SerializeField] private InputActionReference boostAction;
+        [SerializeField] private InputActionReference pauseAction;
 
         public event Action<Vector2> OnMove;
         public event Action OnJumpPressed;
         public event Action<bool> OnBoostStateChanged;
+        public event Action OnPausePressed;
 
         private bool inputEnabled = true;
 
@@ -62,6 +64,12 @@ namespace MedievalRunner.Input
                 boostAction.action.started += HandleBoostStarted;
                 boostAction.action.canceled += HandleBoostCanceled;
             }
+
+            if (pauseAction != null)
+            {
+                pauseAction.action.performed += HandlePause;
+                pauseAction.action.Enable();
+            }
         }
 
         private void UnregisterCallbacks()
@@ -81,6 +89,11 @@ namespace MedievalRunner.Input
             {
                 boostAction.action.started -= HandleBoostStarted;
                 boostAction.action.canceled -= HandleBoostCanceled;
+            }
+
+            if (pauseAction != null)
+            {
+                pauseAction.action.performed -= HandlePause;
             }
         }
 
@@ -131,6 +144,11 @@ namespace MedievalRunner.Input
         private void HandleBoostCanceled(InputAction.CallbackContext context)
         {
             OnBoostStateChanged?.Invoke(false);
+        }
+
+        private void HandlePause(InputAction.CallbackContext context)
+        {
+            OnPausePressed?.Invoke();
         }
     }
 }

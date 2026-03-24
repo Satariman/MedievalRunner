@@ -33,6 +33,11 @@ crashlytics-build.properties
 *.unityproj
 cursor-mcp.json
 
+# Claude Code
+CLAUDE.md
+.claude/
+.mcp.json
+
 # OS generated files
 .DS_Store
 .DS_Store?

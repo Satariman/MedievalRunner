@@ -9,6 +9,8 @@ namespace MedievalRunner.World
         [SerializeField] private List<RunSegment> segments = new List<RunSegment>();
         [SerializeField] private float recycleZ = -30f;
 
+        private readonly List<RunSegment> _recycleBuffer = new List<RunSegment>();
+
         private void Update()
         {
             if (worldMover == null || segments.Count == 0)
@@ -17,12 +19,15 @@ namespace MedievalRunner.World
             }
 
             float speed = worldMover.CurrentSpeed;
-            if (Mathf.Approximately(speed, 0f))
+            if (speed == 0f)
             {
                 return;
             }
 
             float delta = speed * Time.deltaTime;
+            float maxZ = float.MinValue;
+            _recycleBuffer.Clear();
+
             for (int i = 0; i < segments.Count; i++)
             {
                 RunSegment segment = segments[i];
@@ -35,30 +40,25 @@ namespace MedievalRunner.World
                 position.z -= delta;
                 segment.transform.position = position;
 
+                if (position.z > maxZ)
+                {
+                    maxZ = position.z;
+                }
+
                 if (position.z <= recycleZ)
                 {
-                    RecycleSegment(segment);
+                    _recycleBuffer.Add(segment);
                 }
             }
-        }
 
-        private void RecycleSegment(RunSegment segment)
-        {
-            float maxZ = float.MinValue;
-            for (int i = 0; i < segments.Count; i++)
+            for (int i = 0; i < _recycleBuffer.Count; i++)
             {
-                RunSegment other = segments[i];
-                if (other == null)
-                {
-                    continue;
-                }
-
-                maxZ = Mathf.Max(maxZ, other.transform.position.z);
+                RunSegment segment = _recycleBuffer[i];
+                Vector3 position = segment.transform.position;
+                position.z = maxZ + segment.Length;
+                segment.transform.position = position;
+                maxZ = position.z;
             }
-
-            Vector3 position = segment.transform.position;
-            position.z = maxZ + segment.Length;
-            segment.transform.position = position;
         }
     }
 }
